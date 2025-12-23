@@ -1,98 +1,261 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { ChannelItem } from '@/components/ChannelItem'; // Added for search results
+import { CountryCard } from '@/components/CountryCard';
+import { HeroBanner } from '@/components/HeroBanner';
+import { HorizontalChannelItem } from '@/components/HorizontalChannelItem';
+import { SearchBar } from '@/components/SearchBar';
+import { SectionHeader } from '@/components/SectionHeader';
+import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Channel, Country, fetchCountries, fetchFeaturedChannels } from '@/services/api';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [channels, setChannels] = useState<Channel[]>([]);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // Content Categories
+  const [newsChannels, setNewsChannels] = useState<Channel[]>([]);
+  const [sportsChannels, setSportsChannels] = useState<Channel[]>([]);
+  const [movieChannels, setMovieChannels] = useState<Channel[]>([]);
+  const [musicChannels, setMusicChannels] = useState<Channel[]>([]);
+
+  // Search State
+  const [search, setSearch] = useState('');
+  const [filteredChannels, setFilteredChannels] = useState<Channel[]>([]);
+  const [filteredCountries, setFilteredCountries] = useState<Country[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Filter Logic
+  useEffect(() => {
+    if (search.trim() === '') {
+      setFilteredChannels([]);
+      setFilteredCountries([]);
+      return;
+    }
+    const lower = search.toLowerCase();
+    setFilteredChannels(channels.filter(c =>
+      c.name.toLowerCase().includes(lower) ||
+      c.group?.toLowerCase().includes(lower)
+    ));
+    setFilteredCountries(countries.filter(c => c.name.toLowerCase().includes(lower)));
+  }, [search, channels, countries]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const countryData = await fetchCountries();
+      setCountries(countryData);
+
+      const channelData = await fetchFeaturedChannels();
+      setChannels(channelData);
+
+      // Categorize Channels
+      const news = channelData.filter(c => c.group?.toLowerCase().includes('news') || c.name.toLowerCase().includes('news'));
+      const sports = channelData.filter(c => c.group?.toLowerCase().includes('sport') || c.name.toLowerCase().includes('sport'));
+      const movies = channelData.filter(c => c.group?.toLowerCase().includes('movie') || c.name.toLowerCase().includes('cinema') || c.name.toLowerCase().includes('film'));
+      const music = channelData.filter(c => c.group?.toLowerCase().includes('music') || c.name.toLowerCase().includes('music'));
+
+      setNewsChannels(news);
+      setSportsChannels(sports);
+      setMovieChannels(movies);
+      setMusicChannels(music);
+
+    } catch (e) {
+      console.error("Error loading data", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChannelPress = (channel: Channel) => {
+    router.push({ pathname: '/player', params: { url: channel.url } });
+  };
+
+  const handleCountryPress = (country: Country) => {
+    router.push({ pathname: '/channels', params: { code: country.code, countryName: country.name } });
+  };
+
+  const renderSearchResult = ({ item }: { item: Channel | Country }) => {
+    if ('url' in item) {
+      return <ChannelItem channel={item as Channel} onPress={handleChannelPress} />;
+    } else {
+      // Small row for country
+      return (
+        <Pressable style={styles.countryResult} onPress={() => handleCountryPress(item as Country)}>
+          <Text style={styles.countryResultText}>{item.flag} {item.name}</Text>
+        </Pressable>
+      );
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.background} />
+
+      <View style={styles.header}>
+        <SearchBar value={search} onChangeText={setSearch} placeholder="Search channels, countries..." />
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
+      ) : search.length > 0 ? (
+        // SEARCH RESULTS VIEW
+        <View style={styles.content}>
+          <Text style={styles.sectionTitle}>Search Results</Text>
+          <FlatList
+            data={[...filteredCountries, ...filteredChannels]}
+            keyExtractor={(item, index) => ('url' in item ? item.url : item.code) + index}
+            renderItem={renderSearchResult}
+            contentContainerStyle={[styles.list, { paddingBottom: 100 }]} // Add padding for Fab/Tab
+          />
+        </View>
+      ) : (
+        // DASHBOARD VIEW
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
+          <View style={styles.heroContainer}>
+            {channels.length > 0 ? (
+              <HeroBanner
+                title={channels[0].name}
+                subtitle="Featured Channel • Live Now"
+                imageUrl={channels[0].logo || undefined}
+                onPress={() => handleChannelPress(channels[0])}
+              />
+            ) : null}
+          </View>
+
+          {/* NEWS Section */}
+          {newsChannels.length > 0 && (
+            <>
+              <SectionHeader title="News" onPressMore={() => { }} />
+              <FlatList
+                horizontal
+                data={newsChannels}
+                renderItem={({ item }) => <HorizontalChannelItem channel={item} onPress={handleChannelPress} />}
+                keyExtractor={(item, index) => 'news-' + index}
+                contentContainerStyle={styles.horizontalList}
+                showsHorizontalScrollIndicator={false}
+              />
+            </>
+          )}
+
+          {/* SPORTS Section */}
+          {sportsChannels.length > 0 && (
+            <>
+              <SectionHeader title="Sports" onPressMore={() => { }} />
+              <FlatList
+                horizontal
+                data={sportsChannels}
+                renderItem={({ item }) => <HorizontalChannelItem channel={item} onPress={handleChannelPress} />}
+                keyExtractor={(item, index) => 'sports-' + index}
+                contentContainerStyle={styles.horizontalList}
+                showsHorizontalScrollIndicator={false}
+              />
+            </>
+          )}
+
+          {/* MOVIES Section */}
+          {movieChannels.length > 0 && (
+            <>
+              <SectionHeader title="Movies" onPressMore={() => { }} />
+              <FlatList
+                horizontal
+                data={movieChannels}
+                renderItem={({ item }) => <HorizontalChannelItem channel={item} onPress={handleChannelPress} />}
+                keyExtractor={(item, index) => 'movies-' + index}
+                contentContainerStyle={styles.horizontalList}
+                showsHorizontalScrollIndicator={false}
+              />
+            </>
+          )}
+
+          {/* MUSIC Section */}
+          {musicChannels.length > 0 && (
+            <>
+              <SectionHeader title="Music" onPressMore={() => { }} />
+              <FlatList
+                horizontal
+                data={musicChannels}
+                renderItem={({ item }) => <HorizontalChannelItem channel={item} onPress={handleChannelPress} />}
+                keyExtractor={(item, index) => 'music-' + index}
+                contentContainerStyle={styles.horizontalList}
+                showsHorizontalScrollIndicator={false}
+              />
+            </>
+          )}
+
+          {/* Countries Section */}
+          <SectionHeader title="Explore Countries" onPressMore={() => { }} />
+          <FlatList
+            horizontal
+            data={countries.slice(0, 15)}
+            renderItem={({ item }) => (
+              <View style={{ width: 140, marginRight: Spacing.m }}>
+                <CountryCard country={item} onPress={handleCountryPress} />
+              </View>
+            )}
+            keyExtractor={(item) => item.code}
+            contentContainerStyle={styles.horizontalList}
+            showsHorizontalScrollIndicator={false}
+          />
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  header: {
+    paddingHorizontal: Spacing.m,
+    paddingBottom: Spacing.s,
+    backgroundColor: Colors.background,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  loader: {
+    flex: 1,
   },
+  content: {
+    flex: 1,
+  },
+  list: {
+    padding: Spacing.s,
+    paddingBottom: 120, // Added extra padding for Tab Bar
+  },
+  scrollContent: {
+    paddingBottom: 120, // Added extra padding for Tab Bar
+  },
+  heroContainer: {
+    paddingHorizontal: Spacing.m,
+  },
+  horizontalList: {
+    paddingHorizontal: Spacing.m,
+  },
+  sectionTitle: {
+    ...Typography.h2,
+    paddingHorizontal: Spacing.m,
+    marginBottom: Spacing.s,
+    marginTop: Spacing.s,
+  },
+  countryResult: {
+    padding: Spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surfaceHighlight,
+  },
+  countryResultText: {
+    color: Colors.text,
+    fontSize: 16,
+  }
 });
