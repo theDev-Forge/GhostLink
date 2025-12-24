@@ -57,13 +57,10 @@ const parseM3U = (content: string): Channel[] => {
     if (!trimmed) continue;
 
     if (trimmed.startsWith('#EXTINF:')) {
-      // #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://..." group-title="",Channel Name
       const infoPart = trimmed.substring(8);
       const commaIndex = infoPart.lastIndexOf(',');
       const name = infoPart.substring(commaIndex + 1).trim();
       currentChannel.name = name;
-
-      // Extract logo
       const logoMatch = trimmed.match(/tvg-logo="([^"]*)"/);
       if (logoMatch && logoMatch[1]) {
         currentChannel.logo = logoMatch[1];
@@ -71,7 +68,6 @@ const parseM3U = (content: string): Channel[] => {
         currentChannel.logo = null;
       }
 
-      // Extract group
       const groupMatch = trimmed.match(/group-title="([^"]*)"/);
       if (groupMatch && groupMatch[1]) {
         currentChannel.group = groupMatch[1];
@@ -93,6 +89,5 @@ const parseM3U = (content: string): Channel[] => {
 };
 
 export const fetchFeaturedChannels = async (): Promise<Channel[]> => {
-  // Default to US for featured channels for now
   return fetchChannels('us');
 };

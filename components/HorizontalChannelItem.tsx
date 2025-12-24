@@ -37,7 +37,7 @@ export const HorizontalChannelItem: React.FC<HorizontalChannelItemProps> = ({ ch
 
 const styles = StyleSheet.create({
     container: {
-        width: 140, // Fixed width card
+        width: 140,
         marginRight: Spacing.m,
         alignItems: 'center',
     },

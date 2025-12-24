@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.surface,
         borderRadius: 8,
         paddingHorizontal: Spacing.s,
-        paddingVertical: 8, // Fixed height feel
+        paddingVertical: 8,
         marginVertical: Spacing.s,
         borderWidth: 1,
         borderColor: Colors.border,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
         flex: 1,
         color: Colors.text,
         fontSize: 16,
-        height: '100%', // ensure it takes height
-        paddingVertical: 0, // fix android padding
+        height: '100%',
+        paddingVertical: 0,
     },
 });

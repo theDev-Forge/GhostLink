@@ -11,7 +11,6 @@ interface HeroBannerProps {
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ title, subtitle, imageUrl, onPress }) => {
-    // Fallback image if none provided
     const imageSource = imageUrl ? { uri: imageUrl } : { uri: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2605&auto=format&fit=crop' };
 
     return (

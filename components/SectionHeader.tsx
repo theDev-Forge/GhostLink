@@ -11,7 +11,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onPressMore
     return (
         <View style={styles.container}>
             <View style={styles.titleContainer}>
-                {/* Optional icon based on title could go here */}
+
                 <Text style={styles.title}>{title}</Text>
             </View>
             <Pressable onPress={onPressMore} style={styles.moreContainer}>
