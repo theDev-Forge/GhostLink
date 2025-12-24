@@ -57,7 +57,6 @@ export default function HomeScreen() {
       const channelData = await fetchFeaturedChannels();
       setChannels(channelData);
 
-      // Categorize Channels
       const news = channelData.filter(c => c.group?.toLowerCase().includes('news') || c.name.toLowerCase().includes('news'));
       const sports = channelData.filter(c => c.group?.toLowerCase().includes('sport') || c.name.toLowerCase().includes('sport'));
       const movies = channelData.filter(c => c.group?.toLowerCase().includes('movie') || c.name.toLowerCase().includes('cinema') || c.name.toLowerCase().includes('film'));
@@ -118,7 +117,7 @@ export default function HomeScreen() {
           />
         </View>
       ) : (
-        // DASHBOARD VIEW
+
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
           <View style={styles.heroContainer}>
@@ -132,7 +131,6 @@ export default function HomeScreen() {
             ) : null}
           </View>
 
-          {/* NEWS Section */}
           {newsChannels.length > 0 && (
             <>
               <SectionHeader title="News" onPressMore={() => { }} />
@@ -147,7 +145,7 @@ export default function HomeScreen() {
             </>
           )}
 
-          {/* SPORTS Section */}
+
           {sportsChannels.length > 0 && (
             <>
               <SectionHeader title="Sports" onPressMore={() => { }} />
@@ -162,7 +160,7 @@ export default function HomeScreen() {
             </>
           )}
 
-          {/* MOVIES Section */}
+
           {movieChannels.length > 0 && (
             <>
               <SectionHeader title="Movies" onPressMore={() => { }} />
@@ -177,7 +175,7 @@ export default function HomeScreen() {
             </>
           )}
 
-          {/* MUSIC Section */}
+
           {musicChannels.length > 0 && (
             <>
               <SectionHeader title="Music" onPressMore={() => { }} />
@@ -192,7 +190,7 @@ export default function HomeScreen() {
             </>
           )}
 
-          {/* Countries Section */}
+
           <SectionHeader title="Explore Countries" onPressMore={() => { }} />
           <FlatList
             horizontal
@@ -232,10 +230,10 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: Spacing.s,
-    paddingBottom: 120, // Added extra padding for Tab Bar
+    paddingBottom: 120,
   },
   scrollContent: {
-    paddingBottom: 120, // Added extra padding for Tab Bar
+    paddingBottom: 120,
   },
   heroContainer: {
     paddingHorizontal: Spacing.m,

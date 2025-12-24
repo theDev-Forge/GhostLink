@@ -26,7 +26,7 @@ export const CountryCard: React.FC<CountryCardProps> = ({ country, onPress }) =>
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1, // Expand to fill grid cell
+        flex: 1,
         backgroundColor: Colors.surface,
         borderRadius: 12,
         margin: Spacing.xs,
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
         flex: 2,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.surfaceHighlight, // Slightly lighter top
+        backgroundColor: Colors.surfaceHighlight,
     },
     flag: {
         fontSize: 48,

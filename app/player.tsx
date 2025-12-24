@@ -16,10 +16,8 @@ export default function PlayerScreen() {
     const router = useRouter();
 
     useEffect(() => {
-        // Allow landscape orientation
         ScreenOrientation.unlockAsync();
         return () => {
-            // Lock back to portrait
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
         };
     }, []);
@@ -56,7 +54,6 @@ export default function PlayerScreen() {
                 onPlaybackStatusUpdate={status => setStatus(() => status)}
             />
 
-            {/* Resize Toggle Button */}
             <Pressable style={styles.resizeButton} onPress={toggleResizeMode}>
                 <Ionicons
                     name={resizeMode === ResizeMode.CONTAIN ? "expand-outline" : resizeMode === ResizeMode.COVER ? "contract-outline" : "scan-outline"}
@@ -65,7 +62,6 @@ export default function PlayerScreen() {
                 />
             </Pressable>
 
-            {/* Loading Indicator */}
             {status.isLoaded === false && !error && (
                 <View style={[styles.overlay, styles.loadingOverlay]}>
                     <ActivityIndicator size="large" color={Colors.primary} />
@@ -73,7 +69,6 @@ export default function PlayerScreen() {
                 </View>
             )}
 
-            {/* Error Overlay */}
             {error && (
                 <View style={styles.overlay}>
                     <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
@@ -84,7 +79,6 @@ export default function PlayerScreen() {
                 </View>
             )}
 
-            {/* Back Button (Always visible if controls hidden/error) */}
             <Pressable style={styles.closeButton} onPress={() => router.back()}>
                 <Ionicons name="close" size={24} color="#fff" />
             </Pressable>
@@ -112,7 +106,7 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     loadingOverlay: {
-        backgroundColor: '#000', // Solid black for loading
+        backgroundColor: '#000',
     },
     loadingText: {
         color: Colors.textSecondary,
